@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\ItemController;
 use App\Http\Controllers\SurvivorController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -20,6 +21,8 @@ Route::prefix('v1')->group(function () {
 
     Route::apiResource('survivors', SurvivorController::class);
     Route::put('survivors/{id}/last-location', [SurvivorController::class, 'updateLastLocation']);
+
+    Route::apiResource('items', ItemController::class);
 
     Route::fallback(function () {
         return response()->json([
