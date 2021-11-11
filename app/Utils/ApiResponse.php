@@ -84,4 +84,12 @@ class ApiResponse
         ], Response::HTTP_FORBIDDEN);
     }
 
+    static function ofMethodNotAllowed(string $message = "Method Not Allowed")
+    {
+        return response([
+            'success' => false,
+            'message' => $message
+        ], Response::HTTP_METHOD_NOT_ALLOWED);
+    }
+
 }

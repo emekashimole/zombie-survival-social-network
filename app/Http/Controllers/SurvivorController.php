@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Enums\SurvivorGender;
 use App\Enums\SurvivorStatus;
+use App\Exceptions\ResourceNotFoundException;
 use App\Http\Resources\SurvivorResource;
 use App\Models\Survivor;
 use App\Services\SurvivorService;
@@ -175,6 +176,37 @@ class SurvivorController extends Controller
         } catch (Exception $e) {
             Log::error("Error deleting Survivor", [$e]);
             return ApiResponse::ofInternalServerError("Error deleting Survivor");
+        }
+    }
+
+    public function updateLastLocation(Request $request, int $survivorId)
+    {
+        $validator = Validator::make($request->all(), [
+            'lastLocation.lat' => 'required|numeric',
+            'lastLocation.long' => 'required|numeric',
+        ]);
+
+        if ($validator->fails()) {
+            $errors = $validator->errors()->all();
+            return ApiResponse::ofClientError(errors: $errors);
+        }
+
+        try {
+            $survivorInfo = [];
+            $survivorInfo['lastLocation'] = $request->input('lastLocation');
+
+            $survivor = $this->survivorService->getSurvivorById($survivorId);
+            if (!$survivor)
+                throw new ResourceNotFoundException("Survivor Not Found");
+
+            $this->survivorService->updateSurvivor($survivor, $survivorInfo);
+
+            return ApiResponse::ofMessage("Survivor's last location has been updated successfully");
+        } catch (ResourceNotFoundException $e) {
+            return ApiResponse::ofNotFound($e->getMessage());
+        } catch (Exception $e) {
+            Log::error("Error updating Survivor data", [$e]);
+            return ApiResponse::ofInternalServerError("Error updating Survivor data");
         }
     }
 }

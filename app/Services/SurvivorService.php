@@ -41,7 +41,7 @@ class SurvivorService
         if (isset($survivorInfo['name'])) $survivor->name = $survivorInfo['name'];
         if (isset($survivorInfo['age'])) $survivor->age = $survivorInfo['age'];
         if (isset($survivorInfo['gender'])) $survivor->gender = $survivorInfo['gender'];
-        if (isset($survivorInfo['lastLocation'])) new Point($survivorInfo['lastLocation']['lat'], $survivorInfo['lastLocation']['long']);
+        if (isset($survivorInfo['lastLocation'])) $survivor->last_location = new Point($survivorInfo['lastLocation']['lat'], $survivorInfo['lastLocation']['long']);
         if (isset($survivorInfo['status'])) $survivor->status = $survivorInfo['status'];
 
         $survivor->save();
