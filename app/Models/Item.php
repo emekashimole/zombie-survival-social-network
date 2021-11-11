@@ -18,4 +18,9 @@ class Item extends Model
     {
         return $this->belongsToMany(Survivor::class, 'survivor_items');
     }
+
+    public function survivorItems()
+    {
+        return $this->hasMany(SurvivorItems::class);
+    }
 }

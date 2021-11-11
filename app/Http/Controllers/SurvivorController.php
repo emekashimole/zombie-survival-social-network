@@ -51,6 +51,7 @@ class SurvivorController extends Controller
                 $survivors = $this->survivorService->getAllSurvivors()
                     ->paginate(Constants::PAGINATION_PER_PAGE);
 
+            $survivors = SurvivorResource::collection($survivors);
             return ApiResponse::ofPaginatedData($survivors);
         } catch (Exception $e) {
             Log::error("Error fetching list of Survivors: ", [$e]);
@@ -154,7 +155,7 @@ class SurvivorController extends Controller
             $survivor = $this->survivorService->updateSurvivor($survivor, $survivorInfo);
 
             $survivor = new SurvivorResource($survivor);
-            return $survivor;
+            return ApiResponse::ofData($survivor);
         } catch (Exception $e) {
             Log::error("Error updating Survivor data", [$e]);
             return ApiResponse::ofInternalServerError("Error updating Survivor data");

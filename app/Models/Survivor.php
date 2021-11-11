@@ -28,7 +28,7 @@ class Survivor extends Model
         return $this->belongsToMany(Item::class, 'survivor_items');
     }
 
-    public function items()
+    public function survivorItems()
     {
         return $this->hasMany(SurvivorItems::class);
     }
