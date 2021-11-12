@@ -36,7 +36,7 @@ class ApiResponse
             'perPage' => $data->perPage(),
             'previousPageUrl' => $data->previousPageUrl(),
             'total' => $data->total(),
-            'url' => $data->url()
+            'url' => $data->path()
         ];
 
         $responseData = array_merge(['success' => true], $metaData, ['data' => $data]);
