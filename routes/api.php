@@ -21,6 +21,7 @@ Route::prefix('v1')->group(function () {
 
     Route::apiResource('survivors', SurvivorController::class);
     Route::put('survivors/{id}/last-location', [SurvivorController::class, 'updateLastLocation']);
+    Route::post('survivors/{id}/flag', [SurvivorController::class, 'flagInfectedSurvivor']);
 
     Route::apiResource('items', ItemController::class);
 

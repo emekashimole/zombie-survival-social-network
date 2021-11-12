@@ -3,10 +3,14 @@
 namespace App\Services;
 
 use App\Enums\SurvivorStatus;
+use App\Exceptions\OriginFlagAlreadyExistsException;
 use App\Models\Survivor;
+use App\Models\SurvivorFlagLog;
+use App\Models\SurvivorInfectionFlag;
 use App\Models\SurvivorItems;
 use Grimzy\LaravelMysqlSpatial\Types\Point;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 class SurvivorService
 {
@@ -75,6 +79,39 @@ class SurvivorService
         $survivor->infectionFlag()->delete();
         $survivor->itemsOwned()->delete();
         $survivor->delete();
+    }
+
+    public function flagInfectedSurvivor(Survivor $survivor, array $flagInfo): int
+    {
+        $originFlagAlreadyExists = SurvivorFlagLog::where('flag_origin', $flagInfo['flagOriginId'])
+            ->where('flagged_survivor', $survivor->id)
+            ->exists();
+
+        if ($originFlagAlreadyExists)
+            throw new OriginFlagAlreadyExistsException();
+        
+        $survivorAlreadyFlagged = $survivor->infectionFlag()->exists();
+        if ($survivorAlreadyFlagged) {
+            $currentFlagCount = $survivor->infectionFlag->count;
+            $survivor->infectionFlag()->update([
+                'count' => $currentFlagCount+1
+            ]);
+            $survivor->refresh();
+        }
+        else {
+            $survivorInfectionFlag = new SurvivorInfectionFlag();
+            $survivorInfectionFlag->survivor_id = $survivor->id;
+            $survivorInfectionFlag->count = 1;
+            $survivorInfectionFlag->last_location = new Point($flagInfo['lastLocation']['lat'], $flagInfo['lastLocation']['long']);
+            $survivorInfectionFlag->save();
+        }
+
+        SurvivorFlagLog::create([
+            'flag_origin' => $flagInfo['flagOriginId'],
+            'flagged_survivor' => $survivor->id
+        ]);
+
+        return $survivor->infectionFlag->count;
     }
 
 }
