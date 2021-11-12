@@ -4,7 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class CreateSurvivorInfectionFlagsTable extends Migration
+class CreateSurvivorFlagLogsTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,11 +13,10 @@ class CreateSurvivorInfectionFlagsTable extends Migration
      */
     public function up()
     {
-        Schema::create('survivor_infection_flags', function (Blueprint $table) {
+        Schema::create('survivor_flag_logs', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('survivor_id')->constrained();
-            $table->integer('count')->default(1);
-            $table->point('last_location')->nullable();
+            $table->foreignId('flag_origin')->constrained('survivors');
+            $table->foreignId('flagged_survivor')->constrained('survivors');
             $table->timestamps();
         });
     }
@@ -29,6 +28,6 @@ class CreateSurvivorInfectionFlagsTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('survivor_infection_flags');
+        Schema::dropIfExists('survivor_flag_logs');
     }
 }

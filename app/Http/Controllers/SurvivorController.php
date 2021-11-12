@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Enums\SurvivorGender;
 use App\Enums\SurvivorStatus;
+use App\Exceptions\OriginFlagAlreadyExistsException;
 use App\Exceptions\ResourceNotFoundException;
 use App\Http\Resources\SurvivorResource;
 use App\Models\Survivor;
@@ -193,14 +194,13 @@ class SurvivorController extends Controller
         }
 
         try {
-            $survivorInfo = [];
-            $survivorInfo['lastLocation'] = $request->input('lastLocation');
+            $lastLocation = $request->input('lastLocation');
 
             $survivor = $this->survivorService->getSurvivorById($survivorId);
             if (!$survivor)
                 throw new ResourceNotFoundException("Survivor Not Found");
 
-            $this->survivorService->updateSurvivor($survivor, $survivorInfo);
+            $this->survivorService->updateSurvivor($survivor, ['lastLocation' => $lastLocation]);
 
             return ApiResponse::ofMessage("Survivor's last location has been updated successfully");
         } catch (ResourceNotFoundException $e) {
@@ -208,6 +208,49 @@ class SurvivorController extends Controller
         } catch (Exception $e) {
             Log::error("Error updating Survivor data", [$e]);
             return ApiResponse::ofInternalServerError("Error updating Survivor data");
+        }
+    }
+
+    public function flagInfectedSurvivor(Request $request, int $flaggedSurvivorId)
+    {
+        $validator = Validator::make($request->all(), [
+            'flagOriginId' => 'required|exists:survivors,id',
+            'lastLocation.lat' => 'numeric|required_with:lastLocation.long',
+            'lastLocation.long' => 'numeric|required_with:lastLocation.lat'
+        ]);
+
+        if ($validator->fails()) {
+            $errors = $validator->errors()->all();
+            return ApiResponse::ofClientError(errors: $errors);
+        }
+
+        DB::beginTransaction();
+
+        try {
+            $flagInfo = $request->all();
+
+            $survivor = $this->survivorService->getSurvivorById($flaggedSurvivorId);
+            if (!$survivor)
+                throw new ResourceNotFoundException("Survivor Not Found");
+
+            $currentFlagCount = $this->survivorService->flagInfectedSurvivor($survivor, $flagInfo);
+
+            if ($currentFlagCount === Constants::FLAG_COUNT_THRESHOLD)
+                $survivor = $this->survivorService->updateSurvivor($survivor, ['status' => SurvivorStatus::INFECTED]);
+            
+            DB::commit();
+
+            return ApiResponse::ofMessage("Infected survivor has been flagged successfully. Please keep your distance and stay safe");
+        } catch (ResourceNotFoundException $e) {
+            DB::rollBack();
+            return ApiResponse::ofNotFound($e->getMessage());
+        } catch (OriginFlagAlreadyExistsException $e) {
+            DB::rollBack();
+            return ApiResponse::ofClientError($e->getMessage());
+        } catch (Exception $e) {
+            DB::rollBack();
+            Log::error("Error flagging infected Survivor", [$e]);
+            return ApiResponse::ofInternalServerError("Error flagging infected Survivor");
         }
     }
 }
