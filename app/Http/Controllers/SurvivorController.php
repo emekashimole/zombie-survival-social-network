@@ -4,10 +4,13 @@ namespace App\Http\Controllers;
 
 use App\Enums\SurvivorGender;
 use App\Enums\SurvivorStatus;
+use App\Exceptions\ActionNotAllowedException;
+use App\Exceptions\InfectedSurvivorException;
 use App\Exceptions\OriginFlagAlreadyExistsException;
 use App\Exceptions\ResourceNotFoundException;
 use App\Http\Resources\SurvivorResource;
 use App\Models\Survivor;
+use App\Services\ItemService;
 use App\Services\SurvivorService;
 use App\Utils\ApiResponse;
 use App\Utils\Constants;
@@ -21,10 +24,12 @@ use Illuminate\Validation\Rule;
 class SurvivorController extends Controller
 {
     protected SurvivorService $survivorService;
+    protected ItemService $itemService;
 
-    public function __construct(SurvivorService $survivorService)
+    public function __construct(SurvivorService $survivorService, ItemService $itemService)
     {
         $this->survivorService = $survivorService;
+        $this->itemService = $itemService;
     }
     
     /**
@@ -251,6 +256,60 @@ class SurvivorController extends Controller
             DB::rollBack();
             Log::error("Error flagging infected Survivor", [$e]);
             return ApiResponse::ofInternalServerError("Error flagging infected Survivor");
+        }
+    }
+
+    public function tradeSurvivorItems(Request $request, int $survivorId)
+    {
+        $validator = Validator::make($request->all(), [
+            'survivorItems.*' => 'required|array:id,quantity',
+            'survivorItems.*.id' => 'numeric|exists:items,id',
+            'survivorItems.*.quantity' => 'numeric|min:1',
+            'tradeSurvivorId' => 'required|exists:survivors,id',
+            'tradeSurvivorItems.*' => 'required|array:id,quantity',
+            'tradeSurvivorItems.*.id' => 'numeric|exists:items,id',
+            'tradeSurvivorItems.*.quantity' => 'numeric|min:1',
+        ]);
+
+        if ($validator->fails()) {
+            $errors = $validator->errors()->all();
+            return ApiResponse::ofClientError(errors: $errors);
+        }
+
+        try {
+            $survivor = $this->survivorService->getSurvivorById($survivorId);
+            if (!$survivor)
+                throw new ResourceNotFoundException("Survivor Not Found");
+            
+            $survivorIsInfected = $this->survivorService->ifSurvivorIsInfected($survivor);
+            if ($survivorIsInfected)
+                throw new ActionNotAllowedException("C'mon now, you know the rules, infected survivors can no longer trade items");
+
+            $tradeSurvivor = $this->survivorService->getSurvivorById($request->tradeSurvivorId);
+            $tradeSurvivorIsInfected = $this->survivorService->ifSurvivorIsInfected($tradeSurvivor);
+            if ($tradeSurvivorIsInfected)
+                throw new ActionNotAllowedException("C'mon now, you know the rules, you cannot trade items with an infected survivor");
+
+            $survivorItems = $request->input('survivorItems');
+            $this->itemService->itemOwnershipCheck($survivorItems, $survivor);
+
+            $tradeSurvivorItems = $request->input('tradeSurvivorItems');
+            $this->itemService->itemOwnershipCheck($tradeSurvivorItems, $tradeSurvivor);
+
+            $samePointsValue = $this->itemService->samePointsValueCheck($survivorItems, $tradeSurvivorItems);
+            if (!$samePointsValue)
+                throw new ActionNotAllowedException("Items being traded do not offer the same amount of points");
+
+            $this->itemService->tradeItems($survivor, $survivorItems, $tradeSurvivor, $tradeSurvivorItems);
+
+            return ApiResponse::ofMessage("Items trade has been successfully completed");
+        } catch (ResourceNotFoundException $e) {
+            return ApiResponse::ofNotFound($e->getMessage());
+        } catch (ActionNotAllowedException $e) {
+            return ApiResponse::ofClientError($e->getMessage());
+        } catch (Exception $e) {
+            Log::error("Error trading survivor items", [$e]);
+            return ApiResponse::ofInternalServerError("Error trading survivor items");
         }
     }
 }
