@@ -8,6 +8,7 @@ use App\Exceptions\ActionNotAllowedException;
 use App\Exceptions\InfectedSurvivorException;
 use App\Exceptions\OriginFlagAlreadyExistsException;
 use App\Exceptions\ResourceNotFoundException;
+use App\Http\Resources\SurvivorItemsResource;
 use App\Http\Resources\SurvivorResource;
 use App\Models\Survivor;
 use App\Services\ItemService;
@@ -259,7 +260,26 @@ class SurvivorController extends Controller
         }
     }
 
-    public function tradeSurvivorItems(Request $request, int $survivorId)
+    public function getSurvivorItems(int $survivorId)
+    {
+        try {
+            $survivor = $this->survivorService->getSurvivorById($survivorId);
+            if (!$survivor)
+                throw new ResourceNotFoundException("Survivor Not Found");
+
+            $survivorItems = $survivor->survivorItems;
+            $survivorItems = SurvivorItemsResource::collection($survivorItems);
+
+            return ApiResponse::ofData($survivorItems);
+        } catch (ResourceNotFoundException $e) {
+            return ApiResponse::ofNotFound($e->getMessage());
+        } catch (Exception $e) {
+            Log::error("Error fetching survivor items", [$e]);
+            return ApiResponse::ofInternalServerError("Error fetching survivor items");
+        }
+    }
+
+    public function tradeItems(Request $request, int $survivorId)
     {
         $validator = Validator::make($request->all(), [
             'survivorItems.*' => 'required|array:id,quantity',
@@ -275,6 +295,8 @@ class SurvivorController extends Controller
             $errors = $validator->errors()->all();
             return ApiResponse::ofClientError(errors: $errors);
         }
+
+        DB::beginTransaction();
 
         try {
             $survivor = $this->survivorService->getSurvivorById($survivorId);
@@ -302,12 +324,17 @@ class SurvivorController extends Controller
 
             $this->itemService->tradeItems($survivor, $survivorItems, $tradeSurvivor, $tradeSurvivorItems);
 
+            DB::commit();
+
             return ApiResponse::ofMessage("Items trade has been successfully completed");
         } catch (ResourceNotFoundException $e) {
+            DB::rollBack();
             return ApiResponse::ofNotFound($e->getMessage());
         } catch (ActionNotAllowedException $e) {
+            DB::rollBack();
             return ApiResponse::ofClientError($e->getMessage());
         } catch (Exception $e) {
+            DB::rollBack();
             Log::error("Error trading survivor items", [$e]);
             return ApiResponse::ofInternalServerError("Error trading survivor items");
         }

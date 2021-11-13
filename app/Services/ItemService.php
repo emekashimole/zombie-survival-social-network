@@ -57,13 +57,13 @@ class ItemService
     public function samePointsValueCheck(array $survivorItems, array $tradeSurvivorItems): bool
     {
         $survivorItemsTotalValue = array_reduce($survivorItems, function ($carry, $survivorItem) {
-            $item = Item::firstWhere('id', $survivorItem['item_id']);
+            $item = Item::firstWhere('id', $survivorItem['id']);
             $carry += ($item->points * $survivorItem['quantity']);
             return $carry;
         });
 
         $tradeSurvivorItemsTotalValue = array_reduce($tradeSurvivorItems, function ($carry, $tradeSurvivorItem) {
-            $item = Item::firstWhere('id', $tradeSurvivorItem['item_id']);
+            $item = Item::firstWhere('id', $tradeSurvivorItem['id']);
             $carry += ($item->points * $tradeSurvivorItem['quantity']);
             return $carry;
         });
@@ -74,11 +74,15 @@ class ItemService
     public function tradeItems(Survivor $survivor, array $survivorItems, Survivor $tradeSurvivor, array $tradeSurvivorItems): void
     {
         foreach ($survivorItems as $item) {
-            $survivorItem = $survivor->survivorItems()->firstWhere('item_id', $item['id']);
+            $survivorItem = SurvivorItems::where('survivor_id', $survivor->id)
+                ->where('item_id', $item['id'])->first();
             $survivorItem->quantity -= $item['quantity'];
             $survivorItem->save();
+            if ($survivorItem->quantity === 0)
+                $survivorItem->delete();
             
-            $tradeSurvivorItem = $tradeSurvivor->survivorItems()->firstWhere('item_id', $item['id']);
+            $tradeSurvivorItem = SurvivorItems::where('survivor_id', $tradeSurvivor->id)
+                ->where('item_id', $item['id'])->first();
             if (!$tradeSurvivorItem) {
                 SurvivorItems::create([
                     'survivor_id' => $tradeSurvivor->id,
@@ -93,11 +97,15 @@ class ItemService
         }
 
         foreach ($tradeSurvivorItems as $item) {
-            $tradeSurvivorItem = $tradeSurvivor->survivorItems()->firstWhere('item_id', $item['id']);
+            $tradeSurvivorItem = SurvivorItems::where('survivor_id', $tradeSurvivor->id)
+                ->where('item_id', $item['id'])->first();
             $tradeSurvivorItem->quantity -= $item['quantity'];
             $tradeSurvivorItem->save();
+            if ($tradeSurvivorItem->quantity === 0)
+                $tradeSurvivorItem->delete();
             
-            $survivorItem = $tradeSurvivor->survivorItems()->firstWhere('item_id', $item['id']);
+            $survivorItem = SurvivorItems::where('survivor_id', $survivor->id)
+                ->where('item_id', $item['id'])->first();
             if (!$survivorItem) {
                 SurvivorItems::create([
                     'survivor_id' => $survivor->id,
