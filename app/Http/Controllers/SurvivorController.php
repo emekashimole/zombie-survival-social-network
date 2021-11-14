@@ -217,7 +217,7 @@ class SurvivorController extends Controller
         }
     }
 
-    public function flagInfectedSurvivor(Request $request, int $flaggedSurvivorId)
+    public function flagSurvivor(Request $request, int $flaggedSurvivorId)
     {
         $validator = Validator::make($request->all(), [
             'flagOriginId' => 'required|exists:survivors,id',

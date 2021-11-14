@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Collections\SurvivorCollection;
 use Grimzy\LaravelMysqlSpatial\Eloquent\SpatialTrait;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -36,5 +37,10 @@ class Survivor extends Model
     public function infectionFlag()
     {
         return $this->hasOne(SurvivorInfectionFlag::class);
+    }
+
+    public function newCollection(array $models = [])
+    {
+        return new SurvivorCollection($models);
     }
 }

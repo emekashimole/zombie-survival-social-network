@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Collections\SurvivorItemsCollection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
@@ -30,5 +31,10 @@ class SurvivorItems extends Model
     public function item()
     {
         return $this->belongsTo(Item::class);
+    }
+
+    public function newCollection(array $models = [])
+    {
+        return new SurvivorItemsCollection($models);
     }
 }
