@@ -2,21 +2,27 @@
 
 namespace App\Http\Controllers;
 
+use App\Exceptions\ActionNotAllowedException;
+use App\Exceptions\ResourceNotFoundException;
 use App\Http\Resources\ItemResource;
 use App\Models\Item;
 use App\Services\ItemService;
+use App\Services\SurvivorService;
 use App\Utils\ApiResponse;
 use Exception;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
 
 class ItemController extends Controller
 {
     protected ItemService $itemService;
+    protected SurvivorService $survivorService;
 
-    public function __construct(ItemService $itemService)
+    public function __construct(ItemService $itemService, SurvivorService $survivorService)
     {
         $this->itemService = $itemService;
+        $this->survivorService = $survivorService;
     }
     /**
      * Display a listing of the resource.
@@ -127,6 +133,68 @@ class ItemController extends Controller
         } catch (Exception $e) {
             Log::error("Error deleting Item", [$e]);
             return ApiResponse::ofInternalServerError("Error deleting Item");
+        }
+    }
+
+    public function tradeItems(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'survivors' => 'required|array|size:2',
+            'survivors.*' => 'required|array:id,items',
+            'survivors.*.id' => 'exists:survivors,id',
+            'survivors.*.items.*' => 'array:id,quantity',
+            'survivors.*.items.*.id' => 'exists:items,id',
+            'survivors.*.items.*.quantity' => 'numeric|min:1',
+        ]);
+
+        if ($validator->fails()) {
+            $errors = $validator->errors()->all();
+            return ApiResponse::ofClientError(errors: $errors);
+        }
+
+        DB::beginTransaction();
+
+        try {
+            $survivorAData = $request->input('survivors.0');
+            $survivorBData = $request->input('survivors.1');
+
+            $survivorA = $this->survivorService->getSurvivorById($survivorAData['id']);
+            if (!$survivorA)
+                throw new ResourceNotFoundException("Survivor Not Found");
+            if ($this->survivorService->ifSurvivorIsInfected($survivorA))
+                throw new ActionNotAllowedException("C'mon now, you know the rules, infected survivors can no longer trade items");
+            
+            $survivorB = $this->survivorService->getSurvivorById($survivorBData['id']);
+            if (!$survivorB)
+                throw new ResourceNotFoundException("Survivor Not Found");
+            if ($this->survivorService->ifSurvivorIsInfected($survivorB))
+                throw new ActionNotAllowedException("C'mon now, you know the rules, you cannot trade items with an infected survivor");
+
+            $survivorAItems = $survivorAData['items'];
+            $this->itemService->itemOwnershipCheck($survivorAItems, $survivorA);
+
+            $survivorBItems = $survivorBData['items'];
+            $this->itemService->itemOwnershipCheck($survivorBItems, $survivorB);
+
+            $samePointsValue = $this->itemService->samePointsValueCheck($survivorAItems, $survivorBItems);
+            if (!$samePointsValue)
+                throw new ActionNotAllowedException("Items being traded do not offer the same amount of points");
+
+            $this->itemService->tradeItems($survivorA, $survivorAItems, $survivorB, $survivorBItems);
+
+            DB::commit();
+
+            return ApiResponse::ofMessage("Items trade has been successfully completed");
+        } catch (ResourceNotFoundException $e) {
+            DB::rollBack();
+            return ApiResponse::ofNotFound($e->getMessage());
+        } catch (ActionNotAllowedException $e) {
+            DB::rollBack();
+            return ApiResponse::ofClientError($e->getMessage());
+        } catch (Exception $e) {
+            DB::rollBack();
+            Log::error("Error trading survivor items", [$e]);
+            return ApiResponse::ofInternalServerError("Error trading survivor items");
         }
     }
 }

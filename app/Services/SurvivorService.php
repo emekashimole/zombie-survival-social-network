@@ -64,12 +64,12 @@ class SurvivorService
         }
     }
 
-    public function checkIfSurvivorIsClean(Survivor $survivor): bool
+    public function ifSurvivorIsClean(Survivor $survivor): bool
     {
         return ($survivor->status === SurvivorStatus::CLEAN);
     }
 
-    public function checkIfSurvivorIsInfected(Survivor $survivor): bool
+    public function ifSurvivorIsInfected(Survivor $survivor): bool
     {
         return ($survivor->status === SurvivorStatus::INFECTED);
     }

@@ -4,10 +4,14 @@ namespace App\Http\Controllers;
 
 use App\Enums\SurvivorGender;
 use App\Enums\SurvivorStatus;
+use App\Exceptions\ActionNotAllowedException;
+use App\Exceptions\InfectedSurvivorException;
 use App\Exceptions\OriginFlagAlreadyExistsException;
 use App\Exceptions\ResourceNotFoundException;
+use App\Http\Resources\SurvivorItemsResource;
 use App\Http\Resources\SurvivorResource;
 use App\Models\Survivor;
+use App\Services\ItemService;
 use App\Services\SurvivorService;
 use App\Utils\ApiResponse;
 use App\Utils\Constants;
@@ -21,10 +25,12 @@ use Illuminate\Validation\Rule;
 class SurvivorController extends Controller
 {
     protected SurvivorService $survivorService;
+    protected ItemService $itemService;
 
-    public function __construct(SurvivorService $survivorService)
+    public function __construct(SurvivorService $survivorService, ItemService $itemService)
     {
         $this->survivorService = $survivorService;
+        $this->itemService = $itemService;
     }
     
     /**
@@ -251,6 +257,25 @@ class SurvivorController extends Controller
             DB::rollBack();
             Log::error("Error flagging infected Survivor", [$e]);
             return ApiResponse::ofInternalServerError("Error flagging infected Survivor");
+        }
+    }
+
+    public function getSurvivorItems(int $survivorId)
+    {
+        try {
+            $survivor = $this->survivorService->getSurvivorById($survivorId);
+            if (!$survivor)
+                throw new ResourceNotFoundException("Survivor Not Found");
+
+            $survivorItems = $survivor->survivorItems;
+            $survivorItems = SurvivorItemsResource::collection($survivorItems);
+
+            return ApiResponse::ofData($survivorItems);
+        } catch (ResourceNotFoundException $e) {
+            return ApiResponse::ofNotFound($e->getMessage());
+        } catch (Exception $e) {
+            Log::error("Error fetching survivor items", [$e]);
+            return ApiResponse::ofInternalServerError("Error fetching survivor items");
         }
     }
 }

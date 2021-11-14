@@ -21,9 +21,11 @@ Route::prefix('v1')->group(function () {
 
     Route::apiResource('survivors', SurvivorController::class);
     Route::put('survivors/{id}/last-location', [SurvivorController::class, 'updateLastLocation']);
-    Route::post('survivors/{id}/flag', [SurvivorController::class, 'flagInfectedSurvivor']);
+    Route::put('survivors/{id}/flag', [SurvivorController::class, 'flagInfectedSurvivor']);
+    Route::get('survivors/{id}/items', [SurvivorController::class, 'getSurvivorItems']);
 
     Route::apiResource('items', ItemController::class);
+    Route::post('items/trade', [ItemController::class, 'tradeItems']);
 
     Route::fallback(function () {
         return response()->json([
