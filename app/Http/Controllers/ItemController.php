@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Enums\SurvivorStatus;
 use App\Exceptions\ActionNotAllowedException;
 use App\Exceptions\ResourceNotFoundException;
 use App\Http\Resources\ItemResource;
@@ -161,14 +162,14 @@ class ItemController extends Controller
             $survivorA = $this->survivorService->getSurvivorById($survivorAData['id']);
             if (!$survivorA)
                 throw new ResourceNotFoundException("Survivor Not Found");
-            if ($this->survivorService->ifSurvivorIsInfected($survivorA))
+            if ($survivorA->status === SurvivorStatus::INFECTED)
                 throw new ActionNotAllowedException("C'mon now, you know the rules, infected survivors can no longer trade items");
             
             $survivorB = $this->survivorService->getSurvivorById($survivorBData['id']);
             if (!$survivorB)
                 throw new ResourceNotFoundException("Survivor Not Found");
-            if ($this->survivorService->ifSurvivorIsInfected($survivorB))
-                throw new ActionNotAllowedException("C'mon now, you know the rules, you cannot trade items with an infected survivor");
+            if ($survivorB->status === SurvivorStatus::INFECTED)
+                throw new ActionNotAllowedException("C'mon now, you know the rules, infected survivors can no longer trade items");
 
             $survivorAItems = $survivorAData['items'];
             $this->itemService->itemOwnershipCheck($survivorAItems, $survivorA);

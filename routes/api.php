@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\ItemController;
+use App\Http\Controllers\ReportController;
 use App\Http\Controllers\SurvivorController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -21,11 +22,13 @@ Route::prefix('v1')->group(function () {
 
     Route::apiResource('survivors', SurvivorController::class);
     Route::put('survivors/{id}/last-location', [SurvivorController::class, 'updateLastLocation']);
-    Route::put('survivors/{id}/flag', [SurvivorController::class, 'flagInfectedSurvivor']);
+    Route::put('survivors/{id}/flag', [SurvivorController::class, 'flagSurvivor']);
     Route::get('survivors/{id}/items', [SurvivorController::class, 'getSurvivorItems']);
 
     Route::apiResource('items', ItemController::class);
     Route::post('items/trade', [ItemController::class, 'tradeItems']);
+
+    Route::get('report', [ReportController::class, 'generateReport']);
 
     Route::fallback(function () {
         return response()->json([

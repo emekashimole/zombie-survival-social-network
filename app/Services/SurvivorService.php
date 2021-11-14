@@ -64,16 +64,6 @@ class SurvivorService
         }
     }
 
-    public function ifSurvivorIsClean(Survivor $survivor): bool
-    {
-        return ($survivor->status === SurvivorStatus::CLEAN);
-    }
-
-    public function ifSurvivorIsInfected(Survivor $survivor): bool
-    {
-        return ($survivor->status === SurvivorStatus::INFECTED);
-    }
-
     public function deleteSurvivor(Survivor $survivor): void
     {
         $survivor->infectionFlag()->delete();
