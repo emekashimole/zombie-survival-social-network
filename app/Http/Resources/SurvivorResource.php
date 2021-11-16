@@ -25,6 +25,8 @@ class SurvivorResource extends JsonResource
                 'long' => $this->last_location->getLng()
             ],
             'status' => $this->status,
+            'flagCount' => $this->infectionFlag->count ?? 0,
+            'itemsCount' => $this->survivorItems->sum('quantity') ?? 0,
             'createdAt' => $this->created_at->format(Constants::DEFAULT_DATE_SHORT_FORMAT),
             'updatedAt' => $this->updated_at->format(Constants::DEFAULT_DATE_SHORT_FORMAT)
         ];
