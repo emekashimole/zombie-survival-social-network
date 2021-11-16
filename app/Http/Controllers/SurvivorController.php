@@ -187,36 +187,6 @@ class SurvivorController extends Controller
         }
     }
 
-    public function updateLastLocation(Request $request, int $survivorId)
-    {
-        $validator = Validator::make($request->all(), [
-            'lastLocation.lat' => 'required|numeric',
-            'lastLocation.long' => 'required|numeric',
-        ]);
-
-        if ($validator->fails()) {
-            $errors = $validator->errors()->all();
-            return ApiResponse::ofClientError(errors: $errors);
-        }
-
-        try {
-            $lastLocation = $request->input('lastLocation');
-
-            $survivor = $this->survivorService->getSurvivorById($survivorId);
-            if (!$survivor)
-                throw new ResourceNotFoundException("Survivor Not Found");
-
-            $this->survivorService->updateSurvivor($survivor, ['lastLocation' => $lastLocation]);
-
-            return ApiResponse::ofMessage("Survivor's last location has been updated successfully");
-        } catch (ResourceNotFoundException $e) {
-            return ApiResponse::ofNotFound($e->getMessage());
-        } catch (Exception $e) {
-            Log::error("Error updating Survivor data", [$e]);
-            return ApiResponse::ofInternalServerError("Error updating Survivor data");
-        }
-    }
-
     public function flagSurvivor(Request $request, int $flaggedSurvivorId)
     {
         $validator = Validator::make($request->all(), [

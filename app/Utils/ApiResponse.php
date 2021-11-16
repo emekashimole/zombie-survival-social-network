@@ -39,7 +39,7 @@ class ApiResponse
             'url' => $data->path()
         ];
 
-        $responseData = array_merge(['success' => true], $metaData, ['data' => $data]);
+        $responseData = array_merge(['success' => true], ['meta' => $metaData], ['data' => $data]);
         return response($responseData, Response::HTTP_OK);
     }
 

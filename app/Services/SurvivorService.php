@@ -67,7 +67,8 @@ class SurvivorService
     public function deleteSurvivor(Survivor $survivor): void
     {
         $survivor->infectionFlag()->delete();
-        $survivor->itemsOwned()->delete();
+        $survivor->survivorItems()->delete();
+        $survivor->flagLogs()->delete();
         $survivor->delete();
     }
 
