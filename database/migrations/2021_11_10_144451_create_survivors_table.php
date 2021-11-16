@@ -23,6 +23,7 @@ class CreateSurvivorsTable extends Migration
             $table->point('last_location');
             $table->enum('status', SurvivorStatus::getValues())->default(SurvivorStatus::CLEAN);
             $table->timestamps();
+            $table->softDeletes();
         });
     }
 

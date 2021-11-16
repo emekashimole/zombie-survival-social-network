@@ -20882,7 +20882,7 @@ var render = function () {
                           staticClass: "alert alert-success",
                           attrs: { role: "alert" },
                         },
-                        [_vm._v(_vm._s(_vm.message))]
+                        [_c("small", [_vm._v(_vm._s(_vm.message))])]
                       )
                     : _vm._e(),
                   _vm._v(" "),
