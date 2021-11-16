@@ -40,23 +40,9 @@ class SurvivorController extends Controller
      */
     public function index(Request $request)
     {
-        $validator = Validator::make($request->query(), [
-            'query' => 'string'
-        ]);
-
-        if ($validator->fails()) {
-            $errors = $validator->errors()->all();
-            return ApiResponse::ofClientError(errors: $errors);
-        }
-
         try {
-            $queryString = $request->query('query');
-            if ($queryString)
-                $survivors = $this->searchService->searchSurvivors($queryString)
-                    ->paginate(Constants::PAGINATION_PER_PAGE);
-            else
-                $survivors = $this->survivorService->getAllSurvivors()
-                    ->paginate(Constants::PAGINATION_PER_PAGE);
+            $survivors = $this->survivorService->getAllSurvivors()
+                ->paginate(Constants::PAGINATION_PER_PAGE);
 
             $survivors = SurvivorResource::collection($survivors);
             return ApiResponse::ofPaginatedData($survivors);

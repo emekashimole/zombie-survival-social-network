@@ -21,7 +21,7 @@ class SurvivorSeeder extends Seeder
         $items = Item::all();
 
         $survivors = Survivor::factory()
-            ->count(10)
+            ->count(5)
             ->state(new Sequence(
                 ['gender' => SurvivorGender::MALE],
                 ['gender' => SurvivorGender::FEMALE]
