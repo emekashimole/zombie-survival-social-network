@@ -21,7 +21,6 @@ use Symfony\Component\HttpFoundation\Response;
 Route::prefix('v1')->group(function () {
 
     Route::apiResource('survivors', SurvivorController::class);
-    Route::put('survivors/{id}/last-location', [SurvivorController::class, 'updateLastLocation']);
     Route::put('survivors/{id}/flag', [SurvivorController::class, 'flagSurvivor']);
     Route::get('survivors/{id}/items', [SurvivorController::class, 'getSurvivorItems']);
 

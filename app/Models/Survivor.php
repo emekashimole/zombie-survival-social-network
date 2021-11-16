@@ -39,6 +39,11 @@ class Survivor extends Model
         return $this->hasOne(SurvivorInfectionFlag::class);
     }
 
+    public function flagLogs()
+    {
+        return $this->hasMany(SurvivorFlagLog::class, 'flag_origin');
+    }
+
     public function newCollection(array $models = [])
     {
         return new SurvivorCollection($models);
