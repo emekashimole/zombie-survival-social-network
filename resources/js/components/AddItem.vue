@@ -11,7 +11,7 @@
                         </button>
                     </div>
                     <div class="modal-body">
-                        <div class="alert alert-success" v-if="message" role="alert">{{ message }}</div>
+                        <div class="alert alert-success" v-if="message" role="alert"><small>{{ message }}</small></div>
                         <div class="alert alert-danger" v-for="(error, index) in errors" v-bind:key="index" role="alert"><small>{{ error }}</small></div>
                         <div class="form-group">
                             <label for="">Name</label>
