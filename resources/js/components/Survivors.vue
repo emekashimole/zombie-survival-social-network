@@ -376,6 +376,7 @@ export default {
         reset() {
             this.message = '';
             this.errors = [];
+            this.allSurvivors = [];
         }
     },
 }
