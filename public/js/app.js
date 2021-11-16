@@ -2540,6 +2540,8 @@ __webpack_require__.r(__webpack_exports__);
           "long": 0
         },
         status: '',
+        flagCount: 0,
+        itemsCount: 0,
         createdAt: '',
         updatedAt: ''
       },
@@ -21474,9 +21476,9 @@ var render = function () {
               _vm._v(" "),
               _c("td", [_vm._v(_vm._s(survivor.status))]),
               _vm._v(" "),
-              _c("td"),
+              _c("td", [_vm._v(_vm._s(survivor.flagCount))]),
               _vm._v(" "),
-              _c("td"),
+              _c("td", [_vm._v(_vm._s(survivor.itemsCount))]),
               _vm._v(" "),
               _c("td", [_vm._v(_vm._s(survivor.createdAt))]),
               _vm._v(" "),

@@ -38,8 +38,8 @@
                         <td>{{ survivor.age }}</td>
                         <td>{{ survivor.gender }}</td>
                         <td>{{ survivor.status }}</td>
-                        <td></td>
-                        <td></td>
+                        <td>{{ survivor.flagCount }}</td>
+                        <td>{{ survivor.itemsCount }}</td>
                         <td>{{ survivor.createdAt }}</td>
                         <td class="d-flex flex-row justify-content-around">
                             <button @click="getSurvivor(survivor.id)" type="button" class="btn btn-primary btn-sm" data-toggle="modal" data-target="#view-survivor-modal">View</button>
@@ -247,6 +247,8 @@ export default {
                     long: 0
                 },
                 status: '',
+                flagCount: 0,
+                itemsCount: 0,
                 createdAt: '',
                 updatedAt: ''
             },
