@@ -19,7 +19,7 @@ class SurvivorFactory extends Factory
         return [
             'name' => $this->faker->name,
             'age' => $this->faker->numberBetween(10, 85),
-            'last_location' => new Point($this->faker->randomFloat(min: -90, max: 90), $this->faker->randomFloat(min: -90, max: 90)),
+            'last_location' => new Point($this->faker->randomFloat(min: -90, max: 90), $this->faker->randomFloat(min: -180, max: 180)),
             'status' => SurvivorStatus::CLEAN
         ];
     }
