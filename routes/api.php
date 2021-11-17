@@ -18,6 +18,33 @@ use Symfony\Component\HttpFoundation\Response;
 |
 */
 
+/*
+|--------------------------------------------------------------------------
+| Zombie Survival Social Network (ZSSN) API Routes
+|--------------------------------------------------------------------------
+|
+| Detailed in this documentation are the routes used for interacting with the
+| ZSSN application.
+| 
+| Description                   | URI
+|--------------------------------------------------------------------------
+| To list survivors             | GET /api/v1/survivors
+| To create a survivor          | POST /api/v1/survivors
+| To get a single survivor      | GET /api/v1/survivors/{id}
+| To update a survivor          | PUT /api/v1/survivors/{id}
+| To delete a survivor          | DELETE /api/v1/survivors/{id}
+| To flag an infected survivor  | PUT /api/v1/survivors/{id}/flag
+| To get items of a survivor    | GET /api/v1/survivors/{id}/items
+| To list items                 | GET /api/v1/items
+| To create an item             | POST /api/v1/items
+| To get a single item          | GET /api/v1/items/{id}
+| To update an item             | PUT /api/v1/items/{id}
+| To delete an item             | DELETE /api/v1/items/{id}
+| To trade items                | POST /api/v1/items/trade
+| To get generated report       | GET /api/v1/report
+| 
+*/
+
 Route::prefix('v1')->group(function () {
 
     Route::apiResource('survivors', SurvivorController::class);

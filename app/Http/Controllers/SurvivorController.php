@@ -4,8 +4,6 @@ namespace App\Http\Controllers;
 
 use App\Enums\SurvivorGender;
 use App\Enums\SurvivorStatus;
-use App\Exceptions\ActionNotAllowedException;
-use App\Exceptions\InfectedSurvivorException;
 use App\Exceptions\OriginFlagAlreadyExistsException;
 use App\Exceptions\ResourceNotFoundException;
 use App\Http\Resources\SurvivorItemsResource;
