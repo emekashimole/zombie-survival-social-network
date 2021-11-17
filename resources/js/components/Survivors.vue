@@ -21,7 +21,7 @@
                 <thead class="thead-dark">
                     <tr>
                         <th>ID</th>
-                        <th width="10%">Name</th>
+                        <th width="20%">Name</th>
                         <th>Age</th>
                         <th>Gender</th>
                         <th>Status</th>

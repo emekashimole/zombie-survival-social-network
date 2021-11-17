@@ -22410,7 +22410,7 @@ var staticRenderFns = [
       _c("tr", [
         _c("th", [_vm._v("ID")]),
         _vm._v(" "),
-        _c("th", { attrs: { width: "10%" } }, [_vm._v("Name")]),
+        _c("th", { attrs: { width: "20%" } }, [_vm._v("Name")]),
         _vm._v(" "),
         _c("th", [_vm._v("Age")]),
         _vm._v(" "),
