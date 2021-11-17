@@ -2526,6 +2526,8 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
+//
+//
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = ({
   data: function data() {
     return {
@@ -21474,6 +21476,23 @@ var render = function () {
               _vm._v(" "),
               _c("td", [_vm._v(_vm._s(survivor.gender))]),
               _vm._v(" "),
+              _c("td", [
+                _c(
+                  "a",
+                  {
+                    attrs: {
+                      target: "_blank",
+                      href:
+                        "https://maps.google.com/?q=" +
+                        survivor.lastLocation.lat +
+                        "," +
+                        survivor.lastLocation.long,
+                    },
+                  },
+                  [_vm._v("View")]
+                ),
+              ]),
+              _vm._v(" "),
               _c("td", [_vm._v(_vm._s(survivor.status))]),
               _vm._v(" "),
               _c("td", [_vm._v(_vm._s(survivor.flagCount))]),
@@ -22415,6 +22434,8 @@ var staticRenderFns = [
         _c("th", [_vm._v("Age")]),
         _vm._v(" "),
         _c("th", [_vm._v("Gender")]),
+        _vm._v(" "),
+        _c("th", [_vm._v("Location")]),
         _vm._v(" "),
         _c("th", [_vm._v("Status")]),
         _vm._v(" "),

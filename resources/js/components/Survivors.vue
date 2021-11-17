@@ -24,6 +24,7 @@
                         <th width="20%">Name</th>
                         <th>Age</th>
                         <th>Gender</th>
+                        <th>Location</th>
                         <th>Status</th>
                         <th>Flag Count</th>
                         <th>Items Count</th>
@@ -37,6 +38,7 @@
                         <td>{{ survivor.name }}</td>
                         <td>{{ survivor.age }}</td>
                         <td>{{ survivor.gender }}</td>
+                        <td><a target="_blank" v-bind:href="'https://maps.google.com/?q='+survivor.lastLocation.lat+','+survivor.lastLocation.long">View</a></td>
                         <td>{{ survivor.status }}</td>
                         <td>{{ survivor.flagCount }}</td>
                         <td>{{ survivor.itemsCount }}</td>
